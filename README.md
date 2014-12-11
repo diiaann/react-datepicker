@@ -1,12 +1,11 @@
 # React Date Picker
-[![Bower version](https://badge.fury.io/bo/react-date-picker.svg)](http://badge.fury.io/bo/react-date-picker)
-[![Build Status](https://travis-ci.org/Hacker0x01/react-datepicker.svg)](https://travis-ci.org/Hacker0x01/react-datepicker)
-[![devDependency Status](https://david-dm.org/Hacker0x01/react-datepicker/dev-status.svg)](https://david-dm.org/Hacker0x01/react-datepicker#info=devDependencies)
 
-A simple and reusable datepicker component for React
-
-![](https://cloud.githubusercontent.com/assets/1412392/5339491/c40de124-7ee1-11e4-9f07-9276e2545f27.png)
-
+Forked from https://github.com/Hacker0x01/react-datepicker
+## Modifications:
+* Use of a modal instead of a popover, modal's display is toggled instead of messing with the DOM
+* Adds PropTypes
+* Removed tether bower component
+* Other random things that I needed for what I was working on
 
 ## Installation
 
@@ -26,6 +25,3 @@ Installing is really simple and can be done in two different ways:
 
 To run tests, simply run `grunt jest`.
 
-## License
-
-Copyright (c) 2014 HackerOne Inc. and individual contributors. Licensed under MIT license, see [LICENSE](LICENSE) for the full license.

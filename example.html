@@ -2,9 +2,23 @@
   <head>
     <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/react/react-with-addons.js"></script>
-    <script src="bower_components/tether/tether.js"></script>
     <script type="text/javascript" src="react-datepicker.js"></script>
+    <!-- TODO: Remove this, or only include necessary pieces -->
+    <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="react-datepicker.css">
+    <style>
+      .modal.visible{
+        display: block;
+      }
+      .fade{
+        background-color: rgba(44,44,44, 0.5);
+        opacity: initial;
+      }
+      .modal-dialog{
+        margin: 100px auto;
+      }
+
+    </style>
   </head>
   <body>
     <h1>ReactJS DatePicker Example</h1>
@@ -13,46 +27,33 @@
 
     <script type="text/javascript">
       var container = document.querySelector('#datepicker-container');
-      var exampleComponent = React.createClass({
-        displayName: 'exampleComponent',
+      var AppComponent = React.createClass({
+        displayName: 'AppComponent',
 
         getInitialState: function() {
           return {
-            start_date: moment(),
-            end_date: moment()
+            currentInputDate: null
           };
         },
 
-        handleStartDateChange: function(date) {
+        handleDateSave: function(date) {
           this.setState({
-            start_date: date
-          });
-        },
-
-        handleEndDateChange: function(date) {
-          this.setState({
-            end_date: date
+            currentInputDate: date
           });
         },
 
         render: function() {
           return React.DOM.div({}, [
             DatePicker({
-              key: 'example1',
-              selected: this.state.start_date,
-              onChange: this.handleStartDateChange
-            }),
-            DatePicker({
-              key: 'example2',
-              selected: this.state.end_date,
+              currentInputDate: this.state.currentInputDate,
               dateFormat: "YYYY/MM/DD",
-              onChange: this.handleEndDateChange
+              saveDate: this.handleDateSave
             })
           ]);
         }
       })
 
-      React.renderComponent(exampleComponent(), container);
+      React.renderComponent(AppComponent(), container);
     </script>
   </body>
 </html>

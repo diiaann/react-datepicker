@@ -6,41 +6,43 @@ var DateUtil = require('./util/date');
 var Calendar = React.createClass({
   getInitialState: function() {
     return {
-      date: new DateUtil(this.props.selected).clone()
+      month: new DateUtil(moment())
     };
   },
 
-  componentWillReceiveProps: function(nextProps) {
-    // When the selected date changed
-    if (nextProps.selected !== this.props.selected) {
-      this.setState({
-        date: new DateUtil(nextProps.selected).clone()
-      });
-    }
-  },
+  // componentWillReceiveProps: function(nextProps) {
+  //   if (nextProps.selectedDate !== this.props.selectedDate) {
+  //     this.setState({
+  //       month: new DateUtil(nextProps.selectedDate).clone()
+  //     });
+  //   }
+  // },
 
   increaseMonth: function() {
     this.setState({
-      date: this.state.date.addMonth()
+      month: this.state.month.addMonth()
     });
   },
 
   decreaseMonth: function() {
     this.setState({
-      date: this.state.date.subtractMonth()
+      month: this.state.month.subtractMonth()
     });
   },
 
   weeks: function() {
-    return this.state.date.mapWeeksInMonth(this.renderWeek);
+    return this.state.month.mapWeeksInMonth(this.renderWeek);
   },
 
   handleDayClick: function(day) {
-    this.props.onSelect(day);
+    this.setState({
+      month: day
+    });
+    this.props.setCalendarDate(day);
   },
 
   renderWeek: function(weekStart, key) {
-    if(! weekStart.weekInMonth(this.state.date)) {
+    if(! weekStart.weekInMonth(this.state.month)) {
       return;
     }
 
@@ -56,9 +58,8 @@ var Calendar = React.createClass({
       <Day
         key={key}
         day={day}
-        date={this.state.date}
-        onClick={this.handleDayClick.bind(this, day)}
-        selected={new DateUtil(this.props.selected)} />
+        onClickDay={this.handleDayClick.bind(this, day)}
+        currentCalendarDate={this.props.currentCalendarDate} />
     );
   },
 
@@ -69,26 +70,16 @@ var Calendar = React.createClass({
   render: function() {
     return (
       <div className="datepicker-calendar" onMouseDown={this.props.onMouseDown}>
-        <div className="datepicker-calendar-triangle"></div>
         <div className="datepicker-calendar-header">
           <a className="datepicker-calendar-header-navigation-left"
               onClick={this.decreaseMonth}>
           </a>
           <span className="datepicker-calendar-header-month">
-            {this.state.date.format("MMMM YYYY")}
+            {this.state.month.format("MMMM YYYY")}
           </span>
           <a className="datepicker-calendar-header-navigation-right"
               onClick={this.increaseMonth}>
           </a>
-          <div>
-            <div className="datepicker-calendar-header-day">Mo</div>
-            <div className="datepicker-calendar-header-day">Tu</div>
-            <div className="datepicker-calendar-header-day">We</div>
-            <div className="datepicker-calendar-header-day">Th</div>
-            <div className="datepicker-calendar-header-day">Fr</div>
-            <div className="datepicker-calendar-header-day">Sa</div>
-            <div className="datepicker-calendar-header-day">Su</div>
-          </div>
         </div>
         <div className="datepicker-calendar-month">
           {this.weeks()}

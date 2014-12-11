@@ -7,41 +7,43 @@ var DateUtil = require('./util/date');
 var Calendar = React.createClass({displayName: 'Calendar',
   getInitialState: function() {
     return {
-      date: new DateUtil(this.props.selected).clone()
+      month: new DateUtil(moment())
     };
   },
 
-  componentWillReceiveProps: function(nextProps) {
-    // When the selected date changed
-    if (nextProps.selected !== this.props.selected) {
-      this.setState({
-        date: new DateUtil(nextProps.selected).clone()
-      });
-    }
-  },
+  // componentWillReceiveProps: function(nextProps) {
+  //   if (nextProps.selectedDate !== this.props.selectedDate) {
+  //     this.setState({
+  //       month: new DateUtil(nextProps.selectedDate).clone()
+  //     });
+  //   }
+  // },
 
   increaseMonth: function() {
     this.setState({
-      date: this.state.date.addMonth()
+      month: this.state.month.addMonth()
     });
   },
 
   decreaseMonth: function() {
     this.setState({
-      date: this.state.date.subtractMonth()
+      month: this.state.month.subtractMonth()
     });
   },
 
   weeks: function() {
-    return this.state.date.mapWeeksInMonth(this.renderWeek);
+    return this.state.month.mapWeeksInMonth(this.renderWeek);
   },
 
   handleDayClick: function(day) {
-    this.props.onSelect(day);
+    this.setState({
+      month: day
+    });
+    this.props.setCalendarDate(day);
   },
 
   renderWeek: function(weekStart, key) {
-    if(! weekStart.weekInMonth(this.state.date)) {
+    if(! weekStart.weekInMonth(this.state.month)) {
       return;
     }
 
@@ -57,9 +59,8 @@ var Calendar = React.createClass({displayName: 'Calendar',
       Day({
         key: key, 
         day: day, 
-        date: this.state.date, 
-        onClick: this.handleDayClick.bind(this, day), 
-        selected: new DateUtil(this.props.selected)})
+        onClickDay: this.handleDayClick.bind(this, day), 
+        currentCalendarDate: this.props.currentCalendarDate})
     );
   },
 
@@ -70,25 +71,15 @@ var Calendar = React.createClass({displayName: 'Calendar',
   render: function() {
     return (
       React.DOM.div({className: "datepicker-calendar", onMouseDown: this.props.onMouseDown}, 
-        React.DOM.div({className: "datepicker-calendar-triangle"}), 
         React.DOM.div({className: "datepicker-calendar-header"}, 
           React.DOM.a({className: "datepicker-calendar-header-navigation-left", 
               onClick: this.decreaseMonth}
           ), 
           React.DOM.span({className: "datepicker-calendar-header-month"}, 
-            this.state.date.format("MMMM YYYY")
+            this.state.month.format("MMMM YYYY")
           ), 
           React.DOM.a({className: "datepicker-calendar-header-navigation-right", 
               onClick: this.increaseMonth}
-          ), 
-          React.DOM.div(null, 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Mo"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Tu"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "We"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Th"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Fr"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Sa"), 
-            React.DOM.div({className: "datepicker-calendar-header-day"}, "Su")
           )
         ), 
         React.DOM.div({className: "datepicker-calendar-month"}, 
@@ -115,56 +106,21 @@ var DateInput = React.createClass({displayName: 'DateInput',
   },
 
   getInitialState: function() {
-    return {
-      value: this.props.date.format(this.props.dateFormat)
-    };
+
+    if (this.props.currentInputDate != null)
+     return {
+        value: this.props.currentInputDate.format(this.props.dateFormat)
+      };
+    else
+      return {
+        value: ''
+      };
   },
 
   componentDidMount: function() {
-    this.toggleFocus(this.props.focus);
   },
 
   componentWillReceiveProps: function(newProps) {
-    this.toggleFocus(newProps.focus);
-
-    this.setState({
-      value: newProps.date.format(this.props.dateFormat)
-    });
-  },
-
-  toggleFocus: function(focus) {
-    if (focus) {
-      this.refs.input.getDOMNode().focus();
-    } else {
-      this.refs.input.getDOMNode().blur();
-    }
-  },
-
-  handleChange: function(event) {
-    var date = moment(event.target.value, this.props.dateFormat, true);
-
-    this.setState({
-      value: event.target.value
-    });
-
-    if (this.isValueAValidDate()) {
-      this.props.setSelected(new DateUtil(date));
-    }
-  },
-
-  isValueAValidDate: function() {
-    var date = moment(event.target.value, this.props.dateFormat, true);
-
-    return date.isValid();
-  },
-
-  handleKeyDown: function(event) {
-    switch(event.key) {
-    case "Enter":
-      event.preventDefault();
-      this.props.handleEnter();
-      break;
-    }
   },
 
   handleClick: function(event) {
@@ -172,16 +128,15 @@ var DateInput = React.createClass({displayName: 'DateInput',
   },
 
   render: function() {
-    return React.DOM.input({
-      ref: "input", 
-      type: "text", 
-      value: this.state.value, 
-      onBlur: this.props.onBlur, 
-      onClick: this.handleClick, 
-      onKeyDown: this.handleKeyDown, 
-      onFocus: this.props.onFocus, 
-      onChange: this.handleChange, 
-      className: "datepicker-input"});
+    return (
+        React.DOM.input({
+        disabled: "disabled", 
+        ref: "input", 
+        type: "text", 
+        value: this.props.formattedDateValue, 
+        className: "datepicker-input form-control"})
+
+    );
   }
 });
 
@@ -190,95 +145,83 @@ module.exports = DateInput;
 },{"./util/date":6}],3:[function(require,module,exports){
 /** @jsx React.DOM */
 
-var Popover   = require('./popover');
+var Modal     = require('./modal');
 var DateUtil  = require('./util/date');
 var Calendar  = require('./calendar');
 var DateInput = require('./date_input');
 
 var DatePicker = React.createClass({displayName: 'DatePicker',
+
+  propTypes: {
+    currentInputDate: React.PropTypes.object,
+    dateFormat: React.PropTypes.string,
+    saveDate: React.PropTypes.func
+  },
+
+  // when a user is selecting a new date, they are not the same
   getInitialState: function() {
     return {
-      focus: false
+      isModalVisible: false,
+      currentCalendarDate: this.props.currentInputDate
     };
   },
 
-  handleFocus: function() {
+  setCalendarDate: function(date) {
     this.setState({
-      focus: true
+      currentCalendarDate: date
     });
   },
 
-  hideCalendar: function() {
+  handleSaveDate: function(date){
+    this.props.saveDate(this.state.currentCalendarDate);
+  },
+
+  showModal: function(){
     this.setState({
-      focus: false
+      modalVisible: true
     });
   },
 
-  handleBlur: function() {
+  hideModal: function(){
     this.setState({
-      focus: !! this._shouldBeFocussed
-    });
-
-    if (!! this._shouldBeFocussed) {
-      // Firefox doesn't support immediately focussing inside of blur
-      setTimeout(function() {
-        this.setState({
-          focus: true
-        });
-      }.bind(this), 0);
-    }
-
-    // Reset the value of this._shouldBeFocussed to it's default
-    this._shouldBeFocussed = false;
-  },
-
-  handleCalendarMouseDown: function() {
-    this._shouldBeFocussed = true;
-  },
-
-  handleSelect: function(date) {
-    this.setSelected(date);
-
-    setTimeout(function(){
-      this.hideCalendar();
-    }.bind(this), 200);
-  },
-
-  setSelected: function(date) {
-    this.props.onChange(date.moment());
-  },
-
-  onInputClick: function() {
-    this.setState({
-      focus: true
+      modalVisible: false
     });
   },
 
   calendar: function() {
-    if (this.state.focus) {
+    if (this.state.modalVisible) {
+
       return (
-        Popover(null, 
+        Modal({
+          isModalVisible: this.state.modalVisible, 
+          hideModal: this.hideModal, 
+          currentInputDate: this.props.currentInputDate, 
+          saveDate: this.handleSaveDate, 
+          currentCalendarDate: this.state.currentCalendarDate}, 
           Calendar({
-            selected: this.props.selected, 
-            onSelect: this.handleSelect, 
-            onMouseDown: this.handleCalendarMouseDown})
+            currentInputDate: this.props.currentInputDate, 
+            currentCalendarDate: this.state.currentCalendarDate, 
+            setCalendarDate: this.setCalendarDate})
         )
       );
     }
   },
 
   render: function() {
+    var formattedDateValue = (this.props.currentInputDate ? this.props.currentInputDate._date.format(this.props.dateFormat) : '');
+
     return (
-      React.DOM.div(null, 
+      React.DOM.div({className: "input-group"}, 
         DateInput({
-          date: this.props.selected, 
-          dateFormat: this.props.dateFormat,
-          focus: this.state.focus, 
-          onBlur: this.handleBlur, 
-          onFocus: this.handleFocus, 
-          handleClick: this.onInputClick, 
-          handleEnter: this.hideCalendar, 
+          currentInputDate: this.props.currentInputDate, 
+          formattedDateValue: formattedDateValue, 
+          dateFormat: this.props.dateFormat, 
           setSelected: this.setSelected}), 
+
+          React.DOM.span({className: "input-group-btn", onClick: this.showModal}, 
+              React.DOM.button({className: "btn btn-default", type: "button"}, "Go!")
+          ), 
+
         this.calendar()
       )
     );
@@ -287,20 +230,20 @@ var DatePicker = React.createClass({displayName: 'DatePicker',
 
 module.exports = DatePicker;
 
-},{"./calendar":1,"./date_input":2,"./popover":5,"./util/date":6}],4:[function(require,module,exports){
+},{"./calendar":1,"./date_input":2,"./modal":5,"./util/date":6}],4:[function(require,module,exports){
 /** @jsx React.DOM */
 
 var Day = React.createClass({displayName: 'Day',
   render: function() {
-    classes = React.addons.classSet({
+
+    var classes = React.addons.classSet({
       'datepicker-calendar-day': true,
-      'selected': this.props.day.sameDay(this.props.selected),
-      'this-month': this.props.day.sameMonth(this.props.date),
-      'today': this.props.day.sameDay(moment())
+      'this-month': true,
+      'selected': this.props.day.isSameDay(this.props.currentCalendarDate)
     });
 
     return (
-      React.DOM.div({className: classes, onClick: this.props.onClick}, 
+      React.DOM.div({className: classes, onClick: this.props.onClickDay}, 
         this.props.day.day()
       )
     );
@@ -312,88 +255,70 @@ module.exports = Day;
 },{}],5:[function(require,module,exports){
 /** @jsx React.DOM */
 
-var Popover = React.createClass({
-  displayName: 'Popover',
+var Modal = React.createClass({
+  displayName: 'Modal',
 
-  componentWillMount: function() {
-    popoverContainer = document.createElement('span');
-    popoverContainer.className = 'datepicker-calendar-container';
-
-    this._popoverElement = popoverContainer;
-
-    document.querySelector('body').appendChild(this._popoverElement);
+  propTypes: {
+    currentInputDate: React.PropTypes.object.isRequired,
+    currentCalendarDate: React.PropTypes.object.isRequired,
+    saveDate: React.PropTypes.func
   },
 
-  componentDidMount: function() {
-    this._renderPopover();
-  },
-
-  componentDidUpdate: function() {
-    this._renderPopover();
-  },
-
-  _popoverComponent: function() {
-    var className = this.props.className;
-    return (
-      React.DOM.div({className: className}, 
-        React.DOM.div({className: "datepicker-calendar-popover-content"}, 
-          this.props.children
-        )
-      )
-    );
-  },
-
-  _tetherOptions: function() {
-    return {
-      element: this._popoverElement,
-      target: this.getDOMNode().parentElement,
-      attachment: 'top left',
-      targetAttachment: 'bottom left',
-      targetOffset: '10px 0',
-      optimizations: {
-        moveElement: false // always moves to <body> anyway!
-      },
-      constraints: [
-        {
-          to: 'scrollParent',
-          attachment: 'together',
-          pin: true
-        }
-      ]
-    };
-  },
-
-  _renderPopover: function() {
-    React.renderComponent(this._popoverComponent(), this._popoverElement);
-    if (this._tether != null) {
-      this._tether.setOptions(this._tetherOptions());
-    } else {
-      this._tether = new Tether(this._tetherOptions());
-    }
-  },
-
-  componentWillUnmount: function() {
-    this._tether.destroy();
-    React.unmountComponentAtNode(this._popoverElement);
-    if (this._popoverElement.parentNode) {
-      this._popoverElement.parentNode.removeChild(this._popoverElement);
-    }
+  _handleSaveDate: function(){
+    this.props.saveDate();
+    this.props.hideModal();
   },
 
   render: function() {
-    return React.DOM.span(null);
+
+    var saveButtonDisabled;
+    if (this.props.currentCalendarDate == null){
+      saveButtonDisabled = true;
+    }
+    else if (this.props.currentCalendarDate.isSameDay(this.props.currentInputDate)){
+      saveButtonDisabled = true;
+    }
+    else{
+      saveButtonDisabled = false;
+    }
+
+    var modalClasses = React.addons.classSet({
+      'modal': true,
+      'fade': true,
+      'visible': this.props.isModalVisible
+    });
+
+    return (
+      React.DOM.div({className: modalClasses}, 
+        React.DOM.div({className: "modal-dialog"}, 
+          React.DOM.div({className: "modal-content"}, 
+            React.DOM.div({className: "modal-body"}, 
+              React.DOM.div({className: "datepicker-calendar-popover-content"}, 
+                this.props.children
+              )
+            ), 
+            React.DOM.div({className: "modal-footer"}, 
+              React.DOM.button({type: "button", className: "btn btn-default", onClick: this.props.hideModal}, "Close"), 
+              React.DOM.button({type: "button", className: "btn btn-primary", disabled: saveButtonDisabled, onClick: this._handleSaveDate}, "Save")
+            )
+          )
+        )
+      )
+
+    );
   }
 });
 
-module.exports = Popover;
+module.exports = Modal;
 
 },{}],6:[function(require,module,exports){
 function DateUtil(date) {
   this._date = date;
 }
 
-DateUtil.prototype.sameDay = function(other) {
-  return this._date.isSame(other._date, 'day');
+DateUtil.prototype.isSameDay = function(otherDay) {
+  if (otherDay == null) return false;
+  return this._date.isSame(otherDay._date, 'day');
 };
 
 DateUtil.prototype.sameMonth = function(other) {

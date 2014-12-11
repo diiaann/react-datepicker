@@ -18,11 +18,6 @@ module.exports = function(grunt) {
         tasks: ['jshint']
       },
 
-      jest: {
-        files: ['src/**/*.js', 'test/**/*.js'],
-        tasks: ['jest']
-      },
-
       css: {
         files: '**/*.scss',
         tasks: ['sass']
@@ -59,8 +54,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-jsxhint');
-  grunt.loadNpmTasks('grunt-jest');
 
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('travis', ['jshint', 'jest']);
+  grunt.registerTask('travis', ['jshint']);
 };

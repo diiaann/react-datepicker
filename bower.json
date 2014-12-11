@@ -1,9 +1,9 @@
 {
-  "name": "react-date-picker",
+  "name": "diiaan/react-date-picker",
   "version": "0.2.10",
   "authors": [
-    "Remon Oldenbeuving <remon@hackerone.com>",
-    "Martijn Russchen <martijn@hackerone.com>"
+    "Dian Xiao <diiaann@gmail.com>"
+
   ],
   "description": "A simple and reusable datepicker component for React",
   "repository": {
@@ -24,7 +24,6 @@
   "dependencies": {
     "react": "0.11.1",
     "moment": "2.8.2",
-    "tether": "0.6.5"
   },
   "ignore": [
     "**/.*",

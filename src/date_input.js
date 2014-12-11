@@ -11,56 +11,21 @@ var DateInput = React.createClass({
   },
 
   getInitialState: function() {
-    return {
-      value: this.props.date.format(this.props.dateFormat)
-    };
+
+    if (this.props.currentInputDate != null)
+     return {
+        value: this.props.currentInputDate.format(this.props.dateFormat)
+      };
+    else
+      return {
+        value: ''
+      };
   },
 
   componentDidMount: function() {
-    this.toggleFocus(this.props.focus);
   },
 
   componentWillReceiveProps: function(newProps) {
-    this.toggleFocus(newProps.focus);
-
-    this.setState({
-      value: newProps.date.format(this.props.dateFormat)
-    });
-  },
-
-  toggleFocus: function(focus) {
-    if (focus) {
-      this.refs.input.getDOMNode().focus();
-    } else {
-      this.refs.input.getDOMNode().blur();
-    }
-  },
-
-  handleChange: function(event) {
-    var date = moment(event.target.value, this.props.dateFormat, true);
-
-    this.setState({
-      value: event.target.value
-    });
-
-    if (this.isValueAValidDate()) {
-      this.props.setSelected(new DateUtil(date));
-    }
-  },
-
-  isValueAValidDate: function() {
-    var date = moment(event.target.value, this.props.dateFormat, true);
-
-    return date.isValid();
-  },
-
-  handleKeyDown: function(event) {
-    switch(event.key) {
-    case "Enter":
-      event.preventDefault();
-      this.props.handleEnter();
-      break;
-    }
   },
 
   handleClick: function(event) {
@@ -68,16 +33,15 @@ var DateInput = React.createClass({
   },
 
   render: function() {
-    return <input
-      ref="input"
-      type="text"
-      value={this.state.value}
-      onBlur={this.props.onBlur}
-      onClick={this.handleClick}
-      onKeyDown={this.handleKeyDown}
-      onFocus={this.props.onFocus}
-      onChange={this.handleChange}
-      className="datepicker-input" />;
+    return (
+        <input
+        disabled = 'disabled'
+        ref="input"
+        type="text"
+        value={this.props.formattedDateValue}
+        className="datepicker-input form-control" />
+
+    );
   }
 });
 

@@ -1,94 +1,82 @@
 /** @jsx React.DOM */
 
-var Popover   = require('./popover');
+var Modal     = require('./modal');
 var DateUtil  = require('./util/date');
 var Calendar  = require('./calendar');
 var DateInput = require('./date_input');
 
 var DatePicker = React.createClass({
+
+  propTypes: {
+    currentInputDate: React.PropTypes.object,
+    dateFormat: React.PropTypes.string,
+    saveDate: React.PropTypes.func
+  },
+
+  // when a user is selecting a new date, they are not the same
   getInitialState: function() {
     return {
-      focus: false
+      isModalVisible: false,
+      currentCalendarDate: this.props.currentInputDate
     };
   },
 
-  handleFocus: function() {
+  setCalendarDate: function(date) {
     this.setState({
-      focus: true
+      currentCalendarDate: date
     });
   },
 
-  hideCalendar: function() {
+  handleSaveDate: function(date){
+    this.props.saveDate(this.state.currentCalendarDate);
+  },
+
+  showModal: function(){
     this.setState({
-      focus: false
+      modalVisible: true
     });
   },
 
-  handleBlur: function() {
+  hideModal: function(){
     this.setState({
-      focus: !! this._shouldBeFocussed
-    });
-
-    if (!! this._shouldBeFocussed) {
-      // Firefox doesn't support immediately focussing inside of blur
-      setTimeout(function() {
-        this.setState({
-          focus: true
-        });
-      }.bind(this), 0);
-    }
-
-    // Reset the value of this._shouldBeFocussed to it's default
-    this._shouldBeFocussed = false;
-  },
-
-  handleCalendarMouseDown: function() {
-    this._shouldBeFocussed = true;
-  },
-
-  handleSelect: function(date) {
-    this.setSelected(date);
-
-    setTimeout(function(){
-      this.hideCalendar();
-    }.bind(this), 200);
-  },
-
-  setSelected: function(date) {
-    this.props.onChange(date.moment());
-  },
-
-  onInputClick: function() {
-    this.setState({
-      focus: true
+      modalVisible: false
     });
   },
 
   calendar: function() {
-    if (this.state.focus) {
+    if (this.state.modalVisible) {
+
       return (
-        <Popover>
+        <Modal
+          isModalVisible = {this.state.modalVisible}
+          hideModal = {this.hideModal}
+          currentInputDate={this.props.currentInputDate}
+          saveDate={this.handleSaveDate}
+          currentCalendarDate = {this.state.currentCalendarDate} >
           <Calendar
-            selected={this.props.selected}
-            onSelect={this.handleSelect}
-            onMouseDown={this.handleCalendarMouseDown} />
-        </Popover>
+            currentInputDate={this.props.currentInputDate}
+            currentCalendarDate = {this.state.currentCalendarDate}
+            setCalendarDate={this.setCalendarDate} />
+        </Modal>
       );
     }
   },
 
   render: function() {
+    var formattedDateValue = (this.props.currentInputDate ? this.props.currentInputDate._date.format(this.props.dateFormat) : '');
+
     return (
-      <div>
+      <div className='input-group'>
         <DateInput
-          date={this.props.selected}
+          currentInputDate={this.props.currentInputDate}
+          formattedDateValue = {formattedDateValue}
           dateFormat={this.props.dateFormat}
-          focus={this.state.focus}
-          onBlur={this.handleBlur}
-          onFocus={this.handleFocus}
-          handleClick={this.onInputClick}
-          handleEnter={this.hideCalendar}
           setSelected={this.setSelected} />
+
+          <span className='input-group-btn' onClick={this.showModal} >
+              <button className='btn btn-default' type='button'>Go!</button>
+          </span>
+
         {this.calendar()}
       </div>
     );

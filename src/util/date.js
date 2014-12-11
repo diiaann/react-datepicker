@@ -2,8 +2,9 @@ function DateUtil(date) {
   this._date = date;
 }
 
-DateUtil.prototype.sameDay = function(other) {
-  return this._date.isSame(other._date, 'day');
+DateUtil.prototype.isSameDay = function(otherDay) {
+  if (otherDay == null) return false;
+  return this._date.isSame(otherDay._date, 'day');
 };
 
 DateUtil.prototype.sameMonth = function(other) {
