@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
 var Day = require('./day');
+var Holiday = require('./holiday');
 var DateUtil = require('./util/date');
 
 var Calendar = React.createClass({
@@ -55,13 +56,25 @@ var Calendar = React.createClass({
   },
 
   renderDay: function(day, key) {
-    return (
-      <Day
-        key={key}
-        day={day}
-        onClickDay={this.handleDayClick.bind(this, day)}
-        currentCalendarDate={this.props.currentCalendarDate} />
-    );
+    if (day.isWeekend() || day.getHoliday()!==''){
+      var desc = (day.isWeekend() ? 'Weekend' : day.getHoliday() );
+      return (
+        <Holiday
+          key={key}
+          day={day}
+          desc={desc} />
+      );
+    }
+
+    else {
+      return (
+        <Day
+          key={key}
+          day={day}
+          onClickDay={this.handleDayClick.bind(this, day)}
+          currentCalendarDate={this.props.currentCalendarDate} />
+      );
+    }
   },
 
   days: function(weekStart) {

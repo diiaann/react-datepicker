@@ -2,6 +2,7 @@
 /** @jsx React.DOM */
 
 var Day = require('./day');
+var Holiday = require('./holiday');
 var DateUtil = require('./util/date');
 
 var Calendar = React.createClass({
@@ -56,13 +57,25 @@ var Calendar = React.createClass({
   },
 
   renderDay: function(day, key) {
-    return (
-      Day({
-        key: key, 
-        day: day, 
-        onClickDay: this.handleDayClick.bind(this, day), 
-        currentCalendarDate: this.props.currentCalendarDate})
-    );
+    if (day.isWeekend() || day.getHoliday()!==''){
+      var desc = (day.isWeekend() ? 'Weekend' : day.getHoliday() );
+      return (
+        Holiday({
+          key: key, 
+          day: day, 
+          desc: desc})
+      );
+    }
+
+    else {
+      return (
+        Day({
+          key: key, 
+          day: day, 
+          onClickDay: this.handleDayClick.bind(this, day), 
+          currentCalendarDate: this.props.currentCalendarDate})
+      );
+    }
   },
 
   days: function(weekStart) {
@@ -93,7 +106,7 @@ var Calendar = React.createClass({
 
 module.exports = Calendar;
 
-},{"./day":4,"./util/date":6}],2:[function(require,module,exports){
+},{"./day":4,"./holiday":5,"./util/date":7}],2:[function(require,module,exports){
 /** @jsx React.DOM */
 
 var DateUtil = require('./util/date');
@@ -121,7 +134,7 @@ var DateInput = React.createClass({
 
 module.exports = DateInput;
 
-},{"./util/date":6}],3:[function(require,module,exports){
+},{"./util/date":7}],3:[function(require,module,exports){
 /** @jsx React.DOM */
 
 var Modal     = require('./modal');
@@ -202,7 +215,7 @@ var DatePicker = React.createClass({
 
 module.exports = DatePicker;
 
-},{"./calendar":1,"./date_input":2,"./modal":5,"./util/date":6}],4:[function(require,module,exports){
+},{"./calendar":1,"./date_input":2,"./modal":6,"./util/date":7}],4:[function(require,module,exports){
 /** @jsx React.DOM */
 
 var Day = React.createClass({
@@ -228,6 +241,67 @@ var Day = React.createClass({
 module.exports = Day;
 
 },{}],5:[function(require,module,exports){
+/** @jsx React.DOM */
+
+var Holiday = React.createClass({
+
+  displayName: 'Holiday',
+
+  getInitialState: function() {
+    return {
+      showPopover: false
+    };
+  },
+
+  handleMouseOver: function(){
+    console.log('mouseover');
+    this.setState({
+      showPopover: true
+    });
+  },
+
+  handleMouseOut: function(){
+    console.log('mouseout');
+    this.setState({
+      showPopover: false
+    });
+  },
+
+  render: function() {
+
+    var dateClasses = React.addons.classSet({
+      'datepicker-calendar-day': true,
+      'this-month': true,
+      'holiday': true
+
+    });
+
+    var popoverClasses = React.addons.classSet({
+      'popover': true,
+      'bottom': true,
+      'display': this.state.showPopover
+
+    });
+
+    return (
+      React.DOM.div({className: "popover-wrapper"}, 
+        React.DOM.div({className: dateClasses, onMouseOver: this.handleMouseOver, onMouseOut: this.handleMouseOut}, 
+          this.props.day.day()
+        ), 
+        React.DOM.div({className: popoverClasses}, 
+          React.DOM.div({className: "arrow"}), 
+          React.DOM.div({className: "popover-content"}, 
+            React.DOM.p(null, this.props.desc)
+          )
+        )
+      )
+    );
+  }
+});
+
+module.exports = Holiday;
+
+},{}],6:[function(require,module,exports){
 /** @jsx React.DOM */
 
 var Modal = React.createClass({
@@ -287,10 +361,34 @@ var Modal = React.createClass({
 
 module.exports = Modal;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+var holidays = require('./holiday');
+
 function DateUtil(date) {
   this._date = date;
 }
+
+DateUtil.prototype.getHoliday = function() {
+  var self = this;
+  var desc = '';
+
+  holidays.forEach( function (holiday){
+    if (self._date.isSame(holiday.date, 'date')){
+      desc = holiday.desc;
+    }
+  });
+
+  return desc;
+};
+
+DateUtil.prototype.isWeekend = function() {
+  var dayOfWeek = this._date.day();
+
+  if (dayOfWeek === 0 || dayOfWeek === 6)
+    return true;
+  else
+    return false;
+};
 
 DateUtil.prototype.isSameDay = function(otherDay) {
   if (otherDay == null) return false;
@@ -307,7 +405,7 @@ DateUtil.prototype.day = function() {
 
 DateUtil.prototype.mapDaysInWeek = function(callback) {
   var week = [];
-  var firstDay = this._date.clone().startOf('isoWeek');
+  var firstDay = this._date.clone().startOf('week');
 
   for(var i = 0; i < 7; i++) {
     var day = new DateUtil(firstDay.clone().add('days', i));
@@ -320,7 +418,7 @@ DateUtil.prototype.mapDaysInWeek = function(callback) {
 
 DateUtil.prototype.mapWeeksInMonth = function(callback) {
   var month = [];
-  var firstDay = this._date.clone().startOf('month').startOf('isoWeek');
+  var firstDay = this._date.clone().startOf('month').startOf('week');
 
   for(var i = 0; i < 6; i++) {
     var weekStart = new DateUtil(firstDay.clone().add('weeks', i));
@@ -333,7 +431,7 @@ DateUtil.prototype.mapWeeksInMonth = function(callback) {
 
 DateUtil.prototype.weekInMonth = function(other) {
   var firstDayInWeek = this._date.clone();
-  var lastDayInWeek = this._date.clone().isoWeekday(7);
+  var lastDayInWeek = this._date.clone().weekday(6);
 
   return firstDayInWeek.isSame(other._date, 'month') ||
     lastDayInWeek.isSame(other._date, 'month');
@@ -360,6 +458,20 @@ DateUtil.prototype.moment = function() {
 };
 
 module.exports = DateUtil;
+
+},{"./holiday":8}],8:[function(require,module,exports){
+var holidays = [
+  { "date" : "2014-01-01", "desc" : "New Year's Day" },
+  { "date" : "2014-07-04", "desc" : "Independence Day" },
+  { "date" : "2014-11-11", "desc" : "Veteran's Day" },
+  { "date" : "2014-11-28", "desc" : "Thanksgiving Day" },
+  { "date" : "2014-11-29", "desc" : "Day after Thanksgiving" },
+  { "date" : "2014-12-24", "desc" : "Christmas Eve" },
+  { "date" : "2014-12-25", "desc" : "Christmas Day" },
+  { "date" : "2014-12-31", "desc" : "New Year's Eve" }
+];
+
+module.exports = holidays;
 
 },{}]},{},[3])(3)
 });
