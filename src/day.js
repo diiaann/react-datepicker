@@ -1,6 +1,9 @@
 /** @jsx React.DOM */
 
 var Day = React.createClass({
+
+  displayName: 'Day',
+
   render: function() {
 
     var classes = React.addons.classSet({

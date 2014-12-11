@@ -4,19 +4,20 @@ var Day = require('./day');
 var DateUtil = require('./util/date');
 
 var Calendar = React.createClass({
+
+  displayName: 'Calendar',
+
+  propTypes: {
+    currentInputDate: React.PropTypes.object,
+    currentCalendarDate: React.PropTypes.object,
+    setCalendarDate: React.PropTypes.func
+  },
+
   getInitialState: function() {
     return {
       month: new DateUtil(moment())
     };
   },
-
-  // componentWillReceiveProps: function(nextProps) {
-  //   if (nextProps.selectedDate !== this.props.selectedDate) {
-  //     this.setState({
-  //       month: new DateUtil(nextProps.selectedDate).clone()
-  //     });
-  //   }
-  // },
 
   increaseMonth: function() {
     this.setState({

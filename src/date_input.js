@@ -4,32 +4,10 @@ var DateUtil = require('./util/date');
 
 var DateInput = React.createClass({
 
-  getDefaultProps: function() {
-    return {
-      dateFormat: 'YYYY-MM-DD'
-    };
-  },
+  displayName: 'DateInput',
 
-  getInitialState: function() {
-
-    if (this.props.currentInputDate != null)
-     return {
-        value: this.props.currentInputDate.format(this.props.dateFormat)
-      };
-    else
-      return {
-        value: ''
-      };
-  },
-
-  componentDidMount: function() {
-  },
-
-  componentWillReceiveProps: function(newProps) {
-  },
-
-  handleClick: function(event) {
-    this.props.handleClick(event);
+  propTypes: {
+    formattedDateValue: React.PropTypes.string
   },
 
   render: function() {

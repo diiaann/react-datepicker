@@ -7,6 +7,8 @@ var DateInput = require('./date_input');
 
 var DatePicker = React.createClass({
 
+  displayName: 'DatePicker',
+
   propTypes: {
     currentInputDate: React.PropTypes.object,
     dateFormat: React.PropTypes.string,
@@ -44,22 +46,19 @@ var DatePicker = React.createClass({
   },
 
   calendar: function() {
-    if (this.state.modalVisible) {
-
-      return (
-        <Modal
-          isModalVisible = {this.state.modalVisible}
-          hideModal = {this.hideModal}
+    return (
+      <Modal
+        isModalVisible = {this.state.modalVisible}
+        hideModal = {this.hideModal}
+        currentInputDate={this.props.currentInputDate}
+        saveDate={this.handleSaveDate}
+        currentCalendarDate = {this.state.currentCalendarDate} >
+        <Calendar
           currentInputDate={this.props.currentInputDate}
-          saveDate={this.handleSaveDate}
-          currentCalendarDate = {this.state.currentCalendarDate} >
-          <Calendar
-            currentInputDate={this.props.currentInputDate}
-            currentCalendarDate = {this.state.currentCalendarDate}
-            setCalendarDate={this.setCalendarDate} />
-        </Modal>
-      );
-    }
+          currentCalendarDate = {this.state.currentCalendarDate}
+          setCalendarDate={this.setCalendarDate} />
+      </Modal>
+    );
   },
 
   render: function() {
@@ -67,16 +66,10 @@ var DatePicker = React.createClass({
 
     return (
       <div className='input-group'>
-        <DateInput
-          currentInputDate={this.props.currentInputDate}
-          formattedDateValue = {formattedDateValue}
-          dateFormat={this.props.dateFormat}
-          setSelected={this.setSelected} />
-
+        <DateInput formattedDateValue={formattedDateValue} />
           <span className='input-group-btn' onClick={this.showModal} >
               <button className='btn btn-default' type='button'>Go!</button>
           </span>
-
         {this.calendar()}
       </div>
     );

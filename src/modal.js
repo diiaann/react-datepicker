@@ -1,11 +1,12 @@
 /** @jsx React.DOM */
 
 var Modal = React.createClass({
+
   displayName: 'Modal',
 
   propTypes: {
-    currentInputDate: React.PropTypes.object.isRequired,
-    currentCalendarDate: React.PropTypes.object.isRequired,
+    currentInputDate: React.PropTypes.object,
+    currentCalendarDate: React.PropTypes.object,
     saveDate: React.PropTypes.func
   },
 

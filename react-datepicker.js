@@ -4,20 +4,21 @@
 var Day = require('./day');
 var DateUtil = require('./util/date');
 
-var Calendar = React.createClass({displayName: 'Calendar',
+var Calendar = React.createClass({
+
+  displayName: 'Calendar',
+
+  propTypes: {
+    currentInputDate: React.PropTypes.object,
+    currentCalendarDate: React.PropTypes.object,
+    setCalendarDate: React.PropTypes.func
+  },
+
   getInitialState: function() {
     return {
       month: new DateUtil(moment())
     };
   },
-
-  // componentWillReceiveProps: function(nextProps) {
-  //   if (nextProps.selectedDate !== this.props.selectedDate) {
-  //     this.setState({
-  //       month: new DateUtil(nextProps.selectedDate).clone()
-  //     });
-  //   }
-  // },
 
   increaseMonth: function() {
     this.setState({
@@ -97,34 +98,12 @@ module.exports = Calendar;
 
 var DateUtil = require('./util/date');
 
-var DateInput = React.createClass({displayName: 'DateInput',
+var DateInput = React.createClass({
 
-  getDefaultProps: function() {
-    return {
-      dateFormat: 'YYYY-MM-DD'
-    };
-  },
+  displayName: 'DateInput',
 
-  getInitialState: function() {
-
-    if (this.props.currentInputDate != null)
-     return {
-        value: this.props.currentInputDate.format(this.props.dateFormat)
-      };
-    else
-      return {
-        value: ''
-      };
-  },
-
-  componentDidMount: function() {
-  },
-
-  componentWillReceiveProps: function(newProps) {
-  },
-
-  handleClick: function(event) {
-    this.props.handleClick(event);
+  propTypes: {
+    formattedDateValue: React.PropTypes.string
   },
 
   render: function() {
@@ -150,7 +129,9 @@ var DateUtil  = require('./util/date');
 var Calendar  = require('./calendar');
 var DateInput = require('./date_input');
 
-var DatePicker = React.createClass({displayName: 'DatePicker',
+var DatePicker = React.createClass({
+
+  displayName: 'DatePicker',
 
   propTypes: {
     currentInputDate: React.PropTypes.object,
@@ -189,22 +170,19 @@ var DatePicker = React.createClass({displayName: 'DatePicker',
   },
 
   calendar: function() {
-    if (this.state.modalVisible) {
-
-      return (
-        Modal({
-          isModalVisible: this.state.modalVisible, 
-          hideModal: this.hideModal, 
+    return (
+      Modal({
+        isModalVisible: this.state.modalVisible, 
+        hideModal: this.hideModal, 
+        currentInputDate: this.props.currentInputDate, 
+        saveDate: this.handleSaveDate, 
+        currentCalendarDate: this.state.currentCalendarDate}, 
+        Calendar({
           currentInputDate: this.props.currentInputDate, 
-          saveDate: this.handleSaveDate, 
-          currentCalendarDate: this.state.currentCalendarDate}, 
-          Calendar({
-            currentInputDate: this.props.currentInputDate, 
-            currentCalendarDate: this.state.currentCalendarDate, 
-            setCalendarDate: this.setCalendarDate})
-        )
-      );
-    }
+          currentCalendarDate: this.state.currentCalendarDate, 
+          setCalendarDate: this.setCalendarDate})
+      )
+    );
   },
 
   render: function() {
@@ -212,16 +190,10 @@ var DatePicker = React.createClass({displayName: 'DatePicker',
 
     return (
       React.DOM.div({className: "input-group"}, 
-        DateInput({
-          currentInputDate: this.props.currentInputDate, 
-          formattedDateValue: formattedDateValue, 
-          dateFormat: this.props.dateFormat, 
-          setSelected: this.setSelected}), 
-
+        DateInput({formattedDateValue: formattedDateValue}), 
           React.DOM.span({className: "input-group-btn", onClick: this.showModal}, 
               React.DOM.button({className: "btn btn-default", type: "button"}, "Go!")
           ), 
-
         this.calendar()
       )
     );
@@ -233,7 +205,10 @@ module.exports = DatePicker;
 },{"./calendar":1,"./date_input":2,"./modal":5,"./util/date":6}],4:[function(require,module,exports){
 /** @jsx React.DOM */
 
-var Day = React.createClass({displayName: 'Day',
+var Day = React.createClass({
+
+  displayName: 'Day',
+
   render: function() {
 
     var classes = React.addons.classSet({
@@ -256,11 +231,12 @@ module.exports = Day;
 /** @jsx React.DOM */
 
 var Modal = React.createClass({
+
   displayName: 'Modal',
 
   propTypes: {
-    currentInputDate: React.PropTypes.object.isRequired,
-    currentCalendarDate: React.PropTypes.object.isRequired,
+    currentInputDate: React.PropTypes.object,
+    currentCalendarDate: React.PropTypes.object,
     saveDate: React.PropTypes.func
   },
 
