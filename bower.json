@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "react": "0.11.1",
-    "moment": "2.8.2",
+    "moment": "2.8.2"
   },
   "ignore": [
     "**/.*",
