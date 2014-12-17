@@ -23,5 +23,3 @@ Installing is really simple and can be done in two different ways:
 - Start a static webserver `python -m SimpleHTTPServer`
 - And visit `localhost:8000/example.html` to see the example.
 
-To run tests, simply run `grunt jest`.
-
