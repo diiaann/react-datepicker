@@ -1,4 +1,4 @@
-# React Date Picker
+This was created for a coding challenge and used to show I diverged from an existing library. 
 
 Forked from https://github.com/Hacker0x01/react-datepicker
 ## Modifications:
